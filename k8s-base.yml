@@ -99,7 +99,11 @@
       - kubernetes-cni
 
   - name: Fix for kubelet 1.6 startup
-    command: sed -i 's#Environment="KUBELET_KUBECONFIG_ARGS=-.*#Environment="KUBELET_KUBECONFIG_ARGS=--kubeconfig=/etc/kubernetes/kubelet.conf --require-kubeconfig=true --cgroup-driver=systemd"#g' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    lineinfile:
+      dest: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+      regexp: '^ExecStart=/usr/bin/kubelet'
+      state: present
+      line: 'ExecStart=/usr/bin/kubelet --cgroup-driver=systemd $KUBELET_KUBECONFIG_ARGS $KUBELET_SYSTEM_PODS_ARGS $KUBELET_NETWORK_ARGS $KUBELET_DNS_ARGS $KUBELET_AUTHZ_ARGS'
 
   - name: Start and enable docker and Kubelet
     systemd:
