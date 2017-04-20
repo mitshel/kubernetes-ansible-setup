@@ -1,0 +1,13 @@
+---
+- hosts: all
+  roles:
+    - common
+
+- hosts: masters
+  roles:
+    - {role: master, kube_port: 6443 }
+
+- hosts: minions
+  roles:
+    - minions
+

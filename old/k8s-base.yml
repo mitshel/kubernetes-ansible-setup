@@ -10,7 +10,6 @@
     # action: authorized_key user=root key='$FILE(~/.ssh/id_rsa.pub)'
     # Workaround for #2372
     copy: src=~/.ssh/id_rsa.pub dest=/root/.ssh/authorized_keys owner=root mode=0600
-    register: rsa
     ignore_errors: yes
 
   - name: Copy static files

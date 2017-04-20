@@ -5,8 +5,11 @@
       command: kubeadm init
       args:
         creates: /var/lib/etcd
-#    - name: tainted master
-#      command: kubectl taint nodes --all node-role.kubernetes.io/master-
+    - name: tainted master
+      command: kubectl taint nodes --all node-role.kubernetes.io/master-
+      args:
+        creates: ~/taint
+      ignore_errors: yes
     - name: install POD network
       command: kubectl apply -f https://git.io/weave-kube
     - name: get join token
