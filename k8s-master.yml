@@ -1,0 +1,30 @@
+- hosts: masters
+  remote_user: root
+  tasks:
+    - name: kubeadm init
+      command: kubeadm init
+      args:
+        creates: /var/lib/etcd
+#    - name: tainted master
+#      command: kubectl taint nodes --all node-role.kubernetes.io/master-
+    - name: install POD network
+      command: kubectl apply -f https://git.io/weave-kube
+    - name: get join token
+      shell: kubeadm token list | grep -v TOKEN | awk '{print $1}'
+      register: kubetoken
+    - name: get master server and port
+      shell: kubectl config view | grep 'server' | awk -F/ '{print $3}'
+      register: mastersrv
+    - name: debug show token
+      debug: msg={{kubetoken.stdout}}
+    - name: debug show master info
+      debug: msg={{mastersrv.stdout}}
+    - name: copy token adn server to tempfile
+      lineinfile:
+        dest: tokens/master
+        regexp: '^'
+        insertafter: EOF
+        line: '{{kubetoken.stdout}} {{mastersrv.stdout}}'
+        state: present
+        create: yes
+      delegate_to: 127.0.0.1

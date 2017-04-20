@@ -1,0 +1,4 @@
+- hosts: minions
+  tasks:
+    - name: register minions
+

@@ -1,0 +1,7 @@
+- hosts: minions
+  remote_user: root
+  tasks:
+     - name: join node to master
+       command: kubeadm join --token {{lookup('file','tokens/master')}} 
+       args:
+         creates: /etc/kubernetes/kubelet.conf
