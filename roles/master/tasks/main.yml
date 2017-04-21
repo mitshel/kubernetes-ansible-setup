@@ -21,7 +21,7 @@
       ignore_errors: yes
 
     - name: install POD network
-      command: kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f http://docs.projectcalico.org/v2.1/getting-started/kubernetes/installation/hosted/kubeadm/1.6/calico.yaml
+      command: kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f {{ kubeadm_network_addons_urls }}
 
     - name: get join token
       shell: kubeadm --kubeconfig /etc/kubernetes/admin.conf token list | grep -v TOKEN | awk '{print $1}'
