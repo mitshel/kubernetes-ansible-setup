@@ -1,3 +1,7 @@
+    - name: 3 minute paused
+      pause:
+        minutes: 3
+
     - name: kubeadm init
       command: kubeadm init
       args:
@@ -12,7 +16,7 @@
         creates: ~/.kube/config
 
     - name: wait for kubernetes started 
-      wait_for: port={{kube_port}} host=127.0.0.1 delay=15 state=started timeout=300 connect_timeout=15
+      wait_for: port={{kube_port}} host=127.0.0.1 delay=15 state=started timeout=600 connect_timeout=15
 
     - name: tainted master
       command: kubectl --kubeconfig /etc/kubernetes/admin.conf taint nodes --all node-role.kubernetes.io/master-
