@@ -1,6 +1,6 @@
-    - name: 3 minute paused
+    - name: 5 minute paused
       pause:
-        minutes: 3
+        minutes: 5
 
     - name: kubeadm init
       command: kubeadm init
@@ -50,6 +50,16 @@
         state: present
         create: yes
       delegate_to: 127.0.0.1
+
+    - name: activate batch/v2alpha1
+      lineinfile:
+        dest: /etc/kubernetes/manifests/kube-apiserver.yaml
+        regexp: '    - --runtime-config=batch/v2alpha1=true'
+        insertafter: '    - kube-apiserver'
+        line: '    - --runtime-config=batch/v2alpha1=true'
+        state: present
+      tags:
+        - v2alpha1
     
     - name: test Dashboard installations
       shell: kubectl  --kubeconfig /etc/kubernetes/admin.conf get svc --all-namespaces | grep dashboard | awk '{print $2}'

@@ -7,6 +7,8 @@
     # Workaround for #2372
     copy: src=~/.ssh/id_rsa.pub dest=/root/.ssh/authorized_keys owner=root mode=0600
     ignore_errors: yes
+    tags:
+      - ssh-keygen
 
   - name: Copy static files
     copy:
@@ -58,12 +60,16 @@
       responses:
         'Overwrite \(y/n\)\? ': 'n'
     ignore_errors: yes
+    tags:
+      - ssh-keygen
 
   - name: Get id_rsa.pub from remote
     fetch: 
       src: '/root/.ssh/id_rsa.pub'
       dest: 'roles/common/files/{{inventory_hostname}}.pub'
       flat: yes
+    tags:
+      - ssh-keygen
 
   - name: Set authorized_kes on hosts
     authorized_key:
@@ -72,6 +78,8 @@
       state: present
     with_fileglob:
       - 'roles/common/files/*.pub'
+    tags:
+      - ssh-keygen
 
   - name: Add Kubernetes Yum repo
     yum_repository:
@@ -103,6 +111,8 @@
       insertbefore: '^ExecStart=/usr/bin/kubelet'
       state: present
       line: 'Environment="KUBELET_EXTRA_ARGS=--cgroup-driver=systemd"'
+    tags:
+      - kube-fixes
 
   - name: Fix #2 for kubelet 1.6 startup https://github.com/kubernetes/kubernetes/issues/43815
     lineinfile:
@@ -110,6 +120,8 @@
       regexp: '^ExecStart=/usr/bin/kubelet'
       state: present
       line: 'ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_SYSTEM_PODS_ARGS $KUBELET_DNS_ARGS $KUBELET_AUTHZ_ARGS $KUBELET_EXTRA_ARGS'
+    tags:
+      - kube-fixes
 
   - name: Enable Overlay FS
     lineinfile:
@@ -119,6 +131,8 @@
       line: overlay
       state: present
       create: yes
+    tags:
+      - kube-fixes
 
   - name: Edit the docker-storage-setup file
     lineinfile:
@@ -128,9 +142,15 @@
       line: 'STORAGE_DRIVER="overlay"'
       state: present
       create: yes
+    tags:
+      - kube-fixes
 
+  - name: Add nfs storage mount
+    lineinfile:
+      dest: /etc/fstab
+      line: '192.168.7.10:/mnt/SATA1TB-1/Info/Kubernetes     /mnt/nfs/Kubernetes     nfs     defaults        0 0'
 
-  - name: Start and enable docker and Kubelet
+  - name: Start and enable (docker Kubelet rpcbind)
     systemd:
       daemon_reload=yes
       state=started
@@ -139,6 +159,21 @@
     with_items:
       - docker
       - kubelet
+      - rpcbind
+
+  - name: Add docker insecure-registries
+    lineinfile:
+      dest: /etc/docker/daemon.json
+      regexp: '^{'
+      line: '{KUCF"insecure-registries"KUCF:[KUCF"{{ own_docker_registry }}"KUCF]}'
+      state: present
+    tags: 
+    - test-docker-config
+
+  - name: remove 'KUCF' PREFIX from previous task
+    replace: dest="/etc/docker/daemon.json" regexp="KUCF" replace=""
+    tags:
+    - test-docker-config
 
   - name: Reboot all hosts
     shell: nohup bash -c "sleep 2s && reboot" &
@@ -150,3 +185,4 @@
   - name: wait for servers restarts
     local_action: wait_for port=22 host="{{ inventory_hostname }}" delay=30 state=started timeout=600 connect_timeout=15
     when: reboot.changed
+

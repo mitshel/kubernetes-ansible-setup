@@ -12,3 +12,6 @@ kubeadm_network_addons_urls: http://docs.projectcalico.org/v2.1/getting-started/
 # Используется при попытках установить связь после перезагрузки нодов
 # для реализации задержки, чтобы не продолжать установку kubernetes когда система еще не прогрузилась полностью
 kube_port: 6443
+
+# Наша внутренняя docker registry
+own_docker_registry: dockhost:5000
