@@ -8,6 +8,12 @@ kubeadm_network_addons_urls: http://docs.projectcalico.org/v2.1/getting-started/
 #kubeadm_network_addons_urls: 
 #  - https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel-rbac.yml
 #  - https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+#  - https://github.com/coreos/flannel/blob/master/Documentation/kube-flannel.yml
+
+# Weave
+#kubeadm_network_addons_urls: https://git.io/weave-kube
+#kubeadm_network_addons_urls: "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+#kubeadm_network_addons_urls: https://git.io/weave-kube-1.6
 
 # Используется при попытках установить связь после перезагрузки нодов
 # для реализации задержки, чтобы не продолжать установку kubernetes когда система еще не прогрузилась полностью

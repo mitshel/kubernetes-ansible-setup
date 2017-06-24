@@ -25,7 +25,9 @@
       ignore_errors: yes
 
     - name: install POD network
-      command: kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f {{ kubeadm_network_addons_urls }}
+      command: kubectl --kubeconfig /etc/kubernetes/admin.conf apply -n kube-system -f "{{ kubeadm_network_addons_urls }}"
+      tags:
+        - network-addon
 
     - name: get join token
       shell: kubeadm --kubeconfig /etc/kubernetes/admin.conf token list | grep -v TOKEN | awk '{print $1}'
@@ -60,7 +62,11 @@
         state: present
       tags:
         - v2alpha1
-    
+
+    - name: 2 minute wait wor network pod started
+      pause:
+        minutes: 2
+
     - name: test Dashboard installations
       shell: kubectl  --kubeconfig /etc/kubernetes/admin.conf get svc --all-namespaces | grep dashboard | awk '{print $2}'
       register: dashboard
